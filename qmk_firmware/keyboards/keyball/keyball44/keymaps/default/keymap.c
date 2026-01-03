@@ -20,12 +20,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "quantum.h"
 
-// Custom keycodes for DPI and acceleration
+// Custom keycodes for DPI presets and acceleration
 enum custom_keycodes {
   DPI_800 = SAFE_RANGE,
   DPI_1200,
-  DPI_INC, // DPI +100
-  DPI_DEC, // DPI -100
   ACC_TOG, // Acceleration ON/OFF
 };
 
@@ -56,24 +54,16 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   ), 
 
   [3] = LAYOUT_universal(
-    KC_NO    , KC_NO    , KC_NO    , KC_NO    , KC_NO    , KC_NO    ,                                 KC_NO    , KC_NO    , KC_NO    , DPI_DEC  , DPI_INC  , ACC_TOG  ,
-    KC_NO    , KC_NO    , KC_NO    , KC_NO    , KC_NO    , KC_NO    ,                                 KC_NO    , KC_NO    , KC_NO    , KC_NO    , KC_NO    , KC_NO    ,
-    KC_NO    , KC_NO    , KC_NO    , KC_NO    , KC_NO    , KC_NO    ,                                 KC_NO    , KC_NO    , MS_BTN1  , MS_BTN2  , MO(4)    , KC_NO    ,
+    KC_NO    , KC_NO    , KC_NO    , KC_NO    , KC_NO    , KC_NO    ,                                 KC_NO    , KC_NO    , KC_NO    , CPI_D100 , CPI_I100 , ACC_TOG  ,
+    KC_NO    , KC_NO    , KC_NO    , KC_NO    , KC_NO    , KC_NO    ,                                 SCRL_DVI , SCRL_DVD , SSNP_VRT , SSNP_HOR , SSNP_FRE , KC_NO    ,
+    KC_NO    , KC_NO    , KC_NO    , KC_NO    , KC_NO    , KC_NO    ,                                 KC_NO    , KC_NO    , KC_BTN1  , KC_BTN2  , SCRL_MO  , KC_NO    ,
                           QK_BOOT  , KC_NO    , KC_NO    , KC_NO    , KC_NO    ,           DPI_800  , DPI_1200 , _______  , _______             , TG(0)
-  ),
-
-  [4] = LAYOUT_universal(
-    _______  , _______  , _______  , _______  , _______  , _______  ,                                 _______  , _______  , _______  , _______  , _______  , _______  ,
-    _______  , _______  , _______  , _______  , _______  , _______  ,                                 _______  , _______  , _______  , _______  , _______  , _______  ,
-    _______  , _______  , _______  , _______  , _______  , _______  ,                                 _______  , _______  , _______  , _______  , _______  , _______  ,
-                          _______  , _______  , _______  , _______  , _______  ,           _______  , _______  , _______  , _______             , _______
   ),
 };
 // clang-format on
 
 layer_state_t layer_state_set_user(layer_state_t state) {
-  // Enable scroll mode only when layer 4 is active
-  keyball_set_scroll_mode(get_highest_layer(state) == 4);
+  // Scroll mode is controlled by SCRL_MO keycode
   return state;
 }
 
@@ -90,26 +80,6 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     if (record->event.pressed)
     {
       keyball_set_cpi(12); // 1200 CPI
-    }
-    return false;
-  case DPI_INC:
-    if (record->event.pressed)
-    {
-      uint8_t current_cpi = keyball_get_cpi();
-      if (current_cpi < 50)
-      {                                   // Max CPI is around 50 (5000 DPI)
-        keyball_set_cpi(current_cpi + 1); // Increase by 100 DPI
-      }
-    }
-    return false;
-  case DPI_DEC:
-    if (record->event.pressed)
-    {
-      uint8_t current_cpi = keyball_get_cpi();
-      if (current_cpi > 1)
-      {                                   // Min CPI is 1 (100 DPI)
-        keyball_set_cpi(current_cpi - 1); // Decrease by 100 DPI
-      }
     }
     return false;
   case ACC_TOG:
