@@ -20,52 +20,151 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "quantum.h"
 
+// Custom keycodes for DPI and acceleration
+enum custom_keycodes {
+  DPI_800 = SAFE_RANGE,
+  DPI_1200,
+  DPI_INC, // DPI +100
+  DPI_DEC, // DPI -100
+  ACC_TOG, // Acceleration ON/OFF
+};
+
+// Global variable for acceleration mode
+static bool acceleration_enabled = true;
+
 // clang-format off
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
-  // keymap for default
   [0] = LAYOUT_universal(
-    KC_ESC   , KC_Q     , KC_W     , KC_E     , KC_R     , KC_T     ,                                        KC_Y     , KC_U     , KC_I     , KC_O     , KC_P     , KC_DEL   ,
-    KC_TAB   , KC_A     , KC_S     , KC_D     , KC_F     , KC_G     ,                                        KC_H     , KC_J     , KC_K     , KC_L     , KC_SCLN  , S(KC_7)  ,
-    KC_LSFT  , KC_Z     , KC_X     , KC_C     , KC_V     , KC_B     ,                                        KC_N     , KC_M     , KC_COMM  , KC_DOT   , KC_SLSH  , KC_INT1  ,
-              KC_LALT,KC_LGUI,LCTL_T(KC_LNG2)     ,LT(1,KC_SPC),LT(3,KC_LNG1),                  KC_BSPC,LT(2,KC_ENT), RCTL_T(KC_LNG2),     KC_RALT  , KC_PSCR
+    KC_TAB   , KC_Q     , KC_W     , KC_E     , KC_R     , KC_T     ,                                 KC_Y     , KC_U     , KC_I     , KC_O     , KC_P     , KC_MINS  ,
+    KC_LCTL  , KC_A     , KC_S     , KC_D     , KC_F     , KC_G     ,                                 KC_H     , KC_J     , KC_K     , KC_L     , KC_SCLN  , KC_QUOT  ,
+    KC_LSFT  , KC_Z     , KC_X     , KC_C     , KC_V     , KC_B     ,                                 KC_N     , KC_M     , KC_COMM  , KC_DOT   , KC_SLSH  , KC_BSPC  ,
+                          KC_NO    , KC_LALT  , KC_LGUI  ,MO(1)     , KC_SPC   ,           KC_ENT   , MO(2)    , KC_NO    , KC_NO               , TG(3)
   ),
 
   [1] = LAYOUT_universal(
-    SSNP_FRE ,  KC_F1   , KC_F2    , KC_F3   , KC_F4    , KC_F5    ,                                         KC_F6    , KC_F7    , KC_F8    , KC_F9    , KC_F10   , KC_F11   ,
-    SSNP_VRT ,  _______ , _______  , KC_UP   , KC_ENT   , KC_DEL   ,                                         KC_PGUP  , KC_BTN1  , KC_UP    , KC_BTN2  , KC_BTN3  , KC_F12   ,
-    SSNP_HOR ,  _______ , KC_LEFT  , KC_DOWN , KC_RGHT  , KC_BSPC  ,                                         KC_PGDN  , KC_LEFT  , KC_DOWN  , KC_RGHT  , _______  , _______  ,
-                  _______  , _______ , _______  ,         _______  , _______  ,                   _______  , _______  , _______       , _______  , _______
+    KC_GRAVE , KC_1     , KC_2     , KC_3     , KC_4     , KC_5     ,                                 KC_6     , KC_7     , KC_8     , KC_9     , KC_0     , KC_EQL   ,
+    _______  , KC_LNG1  , KC_NO    ,G(KC_PSCR), KC_HOME  , KC_PGUP  ,                                 KC_NO    , KC_NO    , KC_NO    , KC_LBRC  , KC_RBRC  , KC_BSLS  ,
+    _______  , KC_LNG2  ,S(KC_CAPS), KC_NO    , KC_END   , KC_PGDN  ,                                 KC_NO    , KC_NO    , KC_NO    , KC_NO    , KC_NO    , KC_NO    ,
+                          KC_NO    , _______  , _______  , _______  , _______  ,           _______  , KC_NO    , _______  , _______             , _______
   ),
 
   [2] = LAYOUT_universal(
-    _______  ,S(KC_QUOT), KC_7     , KC_8    , KC_9     , S(KC_8)  ,                                         S(KC_9)  , S(KC_1)  , S(KC_6)  , KC_LBRC  , S(KC_4)  , _______  ,
-    _______  ,S(KC_SCLN), KC_4     , KC_5    , KC_6     , KC_RBRC  ,                                         KC_NUHS  , KC_MINS  , S(KC_EQL), S(KC_3)  , KC_QUOT  , S(KC_2)  ,
-    _______  ,S(KC_MINS), KC_1     , KC_2    , KC_3     ,S(KC_RBRC),                                        S(KC_NUHS),S(KC_INT1), KC_EQL   ,S(KC_LBRC),S(KC_SLSH),S(KC_INT3),
-                  KC_0     , KC_DOT  , _______  ,         _______  , _______  ,                   KC_DEL   , _______  , _______       , _______  , _______
-  ),
+    KC_ESC   , KC_F1    , KC_F2    , KC_F3    , KC_F4    , KC_F5    ,                                 KC_F6    , KC_F7    , KC_F8    , KC_F9    , KC_F10   , KC_F11   ,
+    _______  , KC_NO    , KC_NO    , KC_NO    , KC_NO    , KC_NO    ,                                 KC_LEFT  , KC_DOWN  , KC_UP    , KC_RGHT  , KC_NO    , KC_F12   ,
+    _______  , KC_NO    , KC_NO    , KC_NO    , KC_NO    , KC_NO    ,                                 KC_NO    , KC_NO    , KC_NO    , KC_NO    , KC_NO    , KC_DEL   ,
+                          KC_NO    , _______  , _______  , KC_NO    , _______  ,           _______  , _______  , _______  , _______             , _______
+  ), 
 
   [3] = LAYOUT_universal(
-    RGB_TOG  , AML_TO   , AML_I50  , AML_D50  , _______  , _______  ,                                        RGB_M_P  , RGB_M_B  , RGB_M_R  , RGB_M_SW , RGB_M_SN , RGB_M_K  ,
-    RGB_MOD  , RGB_HUI  , RGB_SAI  , RGB_VAI  , _______  , SCRL_DVI ,                                        RGB_M_X  , RGB_M_G  , RGB_M_T  , RGB_M_TW , _______  , _______  ,
-    RGB_RMOD , RGB_HUD  , RGB_SAD  , RGB_VAD  , _______  , SCRL_DVD ,                                        CPI_D1K  , CPI_D100 , CPI_I100 , CPI_I1K  , _______  , KBC_SAVE ,
-                  QK_BOOT  , KBC_RST  , _______  ,        _______  , _______  ,                   _______  , _______  , _______       , KBC_RST  , QK_BOOT
+    KC_NO    , KC_NO    , KC_NO    , KC_NO    , KC_NO    , KC_NO    ,                                 KC_NO    , KC_NO    , KC_NO    , DPI_DEC  , DPI_INC  , ACC_TOG  ,
+    KC_NO    , KC_NO    , KC_NO    , KC_NO    , KC_NO    , KC_NO    ,                                 KC_NO    , KC_NO    , KC_NO    , KC_NO    , KC_NO    , KC_NO    ,
+    KC_NO    , KC_NO    , KC_NO    , KC_NO    , KC_NO    , KC_NO    ,                                 KC_NO    , KC_NO    , MS_BTN1  , MS_BTN2  , MO(4)    , KC_NO    ,
+                          QK_BOOT  , KC_NO    , KC_NO    , KC_NO    , KC_NO    ,           DPI_800  , DPI_1200 , _______  , _______             , TG(0)
+  ),
+
+  [4] = LAYOUT_universal(
+    _______  , _______  , _______  , _______  , _______  , _______  ,                                 _______  , _______  , _______  , _______  , _______  , _______  ,
+    _______  , _______  , _______  , _______  , _______  , _______  ,                                 _______  , _______  , _______  , _______  , _______  , _______  ,
+    _______  , _______  , _______  , _______  , _______  , _______  ,                                 _______  , _______  , _______  , _______  , _______  , _______  ,
+                          _______  , _______  , _______  , _______  , _______  ,           _______  , _______  , _______  , _______             , _______
   ),
 };
 // clang-format on
 
 layer_state_t layer_state_set_user(layer_state_t state) {
-    // Auto enable scroll mode when the highest layer is 3
-    keyball_set_scroll_mode(get_highest_layer(state) == 3);
-    return state;
+  // Enable scroll mode only when layer 4 is active
+  keyball_set_scroll_mode(get_highest_layer(state) == 4);
+  return state;
+}
+
+bool process_record_user(uint16_t keycode, keyrecord_t *record) {
+  switch (keycode)
+  {
+  case DPI_800:
+    if (record->event.pressed)
+    {
+      keyball_set_cpi(8); // 800 CPI
+    }
+    return false;
+  case DPI_1200:
+    if (record->event.pressed)
+    {
+      keyball_set_cpi(12); // 1200 CPI
+    }
+    return false;
+  case DPI_INC:
+    if (record->event.pressed)
+    {
+      uint8_t current_cpi = keyball_get_cpi();
+      if (current_cpi < 50)
+      {                                   // Max CPI is around 50 (5000 DPI)
+        keyball_set_cpi(current_cpi + 1); // Increase by 100 DPI
+      }
+    }
+    return false;
+  case DPI_DEC:
+    if (record->event.pressed)
+    {
+      uint8_t current_cpi = keyball_get_cpi();
+      if (current_cpi > 1)
+      {                                   // Min CPI is 1 (100 DPI)
+        keyball_set_cpi(current_cpi - 1); // Decrease by 100 DPI
+      }
+    }
+    return false;
+  case ACC_TOG:
+    if (record->event.pressed)
+    {
+      acceleration_enabled = !acceleration_enabled;
+    }
+    return false;
+  }
+  return true;
+}
+
+bool process_pointing_device_user(report_mouse_t *mouse_report) {
+  // Disable trackball input on layers 0-2
+  uint8_t highest_layer = get_highest_layer(layer_state | default_layer_state);
+  if (highest_layer < 3)
+  {
+    // Clear all trackball movements and scrolling
+    mouse_report->x = 0;
+    mouse_report->y = 0;
+    mouse_report->h = 0;
+    mouse_report->v = 0;
+    return true;
+  }
+
+  // Apply pointer acceleration on layers 3-4 when enabled
+  if (acceleration_enabled && (highest_layer == 3 || highest_layer == 4)) {
+    // Calculate speed squared
+    int16_t speed_sq = mouse_report->x * mouse_report->x +
+                       mouse_report->y * mouse_report->y;
+
+    // Apply acceleration if speed exceeds threshold
+    if (speed_sq > ACCELERATION_SPEED_THRESHOLD * ACCELERATION_SPEED_THRESHOLD)
+    {
+      float accel_multiplier = 1.0 + (ACCELERATION_STRENGTH * speed_sq / 1000.0);
+      if (accel_multiplier > 3.0)
+      {
+        accel_multiplier = 3.0; // Limit max acceleration
+      }
+
+      mouse_report->x = (int8_t)(mouse_report->x * accel_multiplier);
+      mouse_report->y = (int8_t)(mouse_report->y * accel_multiplier);
+    }
+  }
+
+  return true;
 }
 
 #ifdef OLED_ENABLE
 
-#    include "lib/oledkit/oledkit.h"
+#include "lib/oledkit/oledkit.h"
 
 void oledkit_render_info_user(void) {
-    keyball_oled_render_keyinfo();
-    keyball_oled_render_ballinfo();
-    keyball_oled_render_layerinfo();
+  keyball_oled_render_keyinfo();
+  keyball_oled_render_ballinfo();
+  keyball_oled_render_layerinfo();
 }
 #endif

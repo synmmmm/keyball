@@ -399,8 +399,13 @@ void keyball_oled_render_ballinfo(void) {
     //
     //     Ball: -12  34   0   0
 
-    // 1st line, "Ball" label, mouse x, y, h, and v.
-    oled_write_P(PSTR("Ball\xB1"), false);
+    // 1st line, "Ball"/"Mouse" label, mouse x, y, h, and v.
+    uint8_t highest_layer = get_highest_layer(layer_state | default_layer_state);
+    if (highest_layer >= 3) {
+        oled_write_P(PSTR("Mouse\xB1"), false);
+    } else {
+        oled_write_P(PSTR("Ball\xB1"), false);
+    }
     oled_write(format_4d(keyball.last_mouse.x), false);
     oled_write(format_4d(keyball.last_mouse.y), false);
     oled_write(format_4d(keyball.last_mouse.h), false);
