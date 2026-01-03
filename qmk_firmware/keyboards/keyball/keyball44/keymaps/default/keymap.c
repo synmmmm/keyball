@@ -93,20 +93,10 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 }
 
 bool process_pointing_device_user(report_mouse_t *mouse_report) {
-  // Disable trackball input on layers 0-2
   uint8_t highest_layer = get_highest_layer(layer_state | default_layer_state);
-  if (highest_layer < 3)
-  {
-    // Clear all trackball movements and scrolling
-    mouse_report->x = 0;
-    mouse_report->y = 0;
-    mouse_report->h = 0;
-    mouse_report->v = 0;
-    return true;
-  }
 
-  // Apply pointer acceleration on layers 3-4 when enabled
-  if (acceleration_enabled && (highest_layer == 3 || highest_layer == 4)) {
+  // Apply pointer acceleration on layer 3 when enabled
+  if (acceleration_enabled && highest_layer == 3) {
     // Calculate speed squared
     int16_t speed_sq = mouse_report->x * mouse_report->x +
                        mouse_report->y * mouse_report->y;
